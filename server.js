@@ -29,8 +29,15 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      // Allow requests with no origin (mobile apps, curl, postman) or if wildcard / dev
+      if (
+        !origin ||
+        process.env.CLIENT_URL === '*' ||
+        allowedOrigins.includes(origin) ||
+        (origin && origin.includes('vercel.app')) ||
+        (origin && origin.includes('render.com')) ||
+        process.env.NODE_ENV !== 'production'
+      ) {
         return callback(null, true);
       }
       return callback(new Error('Not allowed by CORS'));
