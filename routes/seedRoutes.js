@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import Admin from '../models/adminModel.js';
+import Category from '../models/categoryModel.js';
+import Product from '../models/productModel.js';
+import Section from '../models/sectionModel.js';
+import asyncHandler from '../utils/asyncHandler.js';
+
 const router = express.Router();
-const Admin = require('../models/adminModel');
-const Category = require('../models/categoryModel');
-const Product = require('../models/productModel');
-const Section = require('../models/sectionModel');
-const asyncHandler = require('../utils/asyncHandler');
 
 // Initial seed categories
 const demoCategories = [
@@ -385,4 +386,4 @@ router.post(
   })
 );
 
-module.exports = router;
+export default router;

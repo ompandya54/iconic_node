@@ -1,6 +1,6 @@
-const Section = require('../models/sectionModel');
-const Product = require('../models/productModel');
-const asyncHandler = require('../utils/asyncHandler');
+import Section from '../models/sectionModel.js';
+import Product from '../models/productModel.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * @desc    Get all active landing page sections with populated products
@@ -224,7 +224,16 @@ const deleteSection = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  getActiveSectionsWithProducts,
+  getAllSections,
+  createSection,
+  updateSection,
+  toggleSectionStatus,
+  deleteSection,
+};
+
+export default {
   getActiveSectionsWithProducts,
   getAllSections,
   createSection,

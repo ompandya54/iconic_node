@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   uploadSingleImage,
   uploadMultipleImages,
-} = require('../controllers/uploadController');
-const { protectAdmin } = require('../middlewares/authMiddleware');
-const { upload } = require('../middlewares/uploadMiddleware');
+} from '../controllers/uploadController.js';
+import { protectAdmin } from '../middlewares/authMiddleware.js';
+import { upload } from '../middlewares/uploadMiddleware.js';
+
+const router = express.Router();
 
 router.post('/', protectAdmin, upload.single('image'), uploadSingleImage);
 router.post('/multiple', protectAdmin, upload.array('images', 10), uploadMultipleImages);
 
-module.exports = router;
-
+export default router;

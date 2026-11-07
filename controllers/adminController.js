@@ -1,9 +1,9 @@
-const Admin = require('../models/adminModel');
-const Order = require('../models/orderModel');
-const Product = require('../models/productModel');
-const User = require('../models/userModel');
-const generateToken = require('../utils/generateToken');
-const asyncHandler = require('../utils/asyncHandler');
+import Admin from '../models/adminModel.js';
+import Order from '../models/orderModel.js';
+import Product from '../models/productModel.js';
+import User from '../models/userModel.js';
+import generateToken from '../utils/generateToken.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * @desc    Admin login
@@ -181,7 +181,14 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  adminLogin,
+  getAdminProfile,
+  createAdmin,
+  getDashboardStats,
+};
+
+export default {
   adminLogin,
   getAdminProfile,
   createAdmin,

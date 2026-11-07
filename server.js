@@ -1,14 +1,29 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const dotenv = require('dotenv');
-const morgan = require('morgan');
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import dotenv from 'dotenv';
+import morgan from 'morgan';
+import { fileURLToPath } from 'url';
+
+import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import sectionRoutes from './routes/sectionRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
+import seedRoutes from './routes/seedRoutes.js';
+import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
+
+// Resolve __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
 
 // Connect to MongoDB
-const connectDB = require('./config/db');
 connectDB();
 
 const app = express();
@@ -67,17 +82,16 @@ app.get('/', (req, res) => {
 });
 
 // Mount API routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/categories', require('./routes/categoryRoutes'));
-app.use('/api/orders', require('./routes/orderRoutes'));
-app.use('/api/sections', require('./routes/sectionRoutes'));
-app.use('/api/upload', require('./routes/uploadRoutes'));
-app.use('/api/seed', require('./routes/seedRoutes'));
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/sections', sectionRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Middlewares for 404 and global error handling
-const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 app.use(notFound);
 app.use(errorHandler);
 
@@ -97,5 +111,5 @@ process.on('unhandledRejection', (err) => {
   // server.close(() => process.exit(1));
 });
 
-module.exports = app;
-
+export default app;
+export { app, server };

@@ -1,6 +1,6 @@
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
-const asyncHandler = require('../utils/asyncHandler');
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
+import asyncHandler from '../utils/asyncHandler.js';
 
 // Configure Cloudinary if environment variables are present
 if (
@@ -108,7 +108,12 @@ const uploadMultipleImages = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  uploadSingleImage,
+  uploadMultipleImages,
+};
+
+export default {
   uploadSingleImage,
   uploadMultipleImages,
 };

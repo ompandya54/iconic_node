@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
-const Admin = require('../models/adminModel');
-const asyncHandler = require('../utils/asyncHandler');
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
+import Admin from '../models/adminModel.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * Protect routes: Checks for JWT token in Authorization header or cookies
@@ -105,7 +105,13 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = {
+export {
+  protect,
+  adminOnly,
+  protectAdmin,
+};
+
+export default {
   protect,
   adminOnly,
   protectAdmin,

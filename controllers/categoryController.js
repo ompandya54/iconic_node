@@ -1,6 +1,6 @@
-const Category = require('../models/categoryModel');
-const Product = require('../models/productModel');
-const asyncHandler = require('../utils/asyncHandler');
+import Category from '../models/categoryModel.js';
+import Product from '../models/productModel.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * @desc    Get all categories
@@ -153,7 +153,15 @@ const deleteCategory = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  getCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+};
+
+export default {
   getCategories,
   getCategoryById,
   createCategory,

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const sectionSchema = new mongoose.Schema(
   {
@@ -55,5 +55,5 @@ const sectionSchema = new mongoose.Schema(
 
 const Section = mongoose.model('Section', sectionSchema);
 
-module.exports = Section;
-
+export default Section;
+export { Section };

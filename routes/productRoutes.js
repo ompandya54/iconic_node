@@ -1,6 +1,5 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   getProducts,
   getProductById,
   getProductAttributes,
@@ -14,8 +13,10 @@ const {
   deleteProduct,
   toggleProductStatus,
   createProductReview,
-} = require('../controllers/productController');
-const { protect, protectAdmin } = require('../middlewares/authMiddleware');
+} from '../controllers/productController.js';
+import { protect, protectAdmin } from '../middlewares/authMiddleware.js';
+
+const router = express.Router();
 
 // Specific endpoints before parameterized /:id routes
 router.get('/attributes', getProductAttributes);
@@ -40,5 +41,4 @@ router
 
 router.post('/:id/reviews', protect, createProductReview);
 
-module.exports = router;
-
+export default router;

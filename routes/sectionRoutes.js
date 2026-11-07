@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   getActiveSectionsWithProducts,
   getAllSections,
   createSection,
   updateSection,
   toggleSectionStatus,
   deleteSection,
-} = require('../controllers/sectionController');
-const { protectAdmin } = require('../middlewares/authMiddleware');
+} from '../controllers/sectionController.js';
+import { protectAdmin } from '../middlewares/authMiddleware.js';
+
+const router = express.Router();
 
 // Public route: Landing Page calls this to get all active sections with products
 router.get('/active', getActiveSectionsWithProducts);
@@ -26,5 +27,4 @@ router
   .put(protectAdmin, updateSection)
   .delete(protectAdmin, deleteSection);
 
-module.exports = router;
-
+export default router;

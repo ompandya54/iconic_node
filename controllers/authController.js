@@ -1,6 +1,7 @@
-const User = require('../models/userModel');
-const generateToken = require('../utils/generateToken');
-const asyncHandler = require('../utils/asyncHandler');
+import User from '../models/userModel.js';
+import Product from '../models/productModel.js';
+import generateToken from '../utils/generateToken.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * @desc    Register a new user
@@ -273,7 +274,20 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  updateUserProfile,
+  getAllUsers,
+  getUserById,
+  deleteUser,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
+};
+
+export default {
   registerUser,
   loginUser,
   getUserProfile,

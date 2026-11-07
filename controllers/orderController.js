@@ -1,6 +1,6 @@
-const Order = require('../models/orderModel');
-const Product = require('../models/productModel');
-const asyncHandler = require('../utils/asyncHandler');
+import Order from '../models/orderModel.js';
+import Product from '../models/productModel.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * @desc    Create new order
@@ -296,7 +296,17 @@ const deleteOrder = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  createOrder,
+  getOrderById,
+  getMyOrders,
+  getAllOrders,
+  updateOrderStatus,
+  updateOrderToPaid,
+  deleteOrder,
+};
+
+export default {
   createOrder,
   getOrderById,
   getMyOrders,

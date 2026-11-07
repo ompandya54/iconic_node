@@ -1,6 +1,6 @@
-const Product = require('../models/productModel');
-const Category = require('../models/categoryModel');
-const asyncHandler = require('../utils/asyncHandler');
+import Product from '../models/productModel.js';
+import Category from '../models/categoryModel.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * @desc    Fetch all products with search, filters, sorting & pagination
@@ -699,7 +699,23 @@ const createProductReview = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+export {
+  getProducts,
+  getProductById,
+  getProductAttributes,
+  getBestsellers,
+  getFeaturedProducts,
+  getNewArrivals,
+  getRelatedProducts,
+  getAdminProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  toggleProductStatus,
+  createProductReview,
+};
+
+export default {
   getProducts,
   getProductById,
   getProductAttributes,

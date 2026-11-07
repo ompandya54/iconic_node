@@ -1,8 +1,8 @@
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-const Admin = require('../models/adminModel');
-const Category = require('../models/categoryModel');
-const Product = require('../models/productModel');
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import Admin from '../models/adminModel.js';
+import Category from '../models/categoryModel.js';
+import Product from '../models/productModel.js';
 
 dotenv.config();
 

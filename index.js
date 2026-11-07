@@ -1,2 +1,4 @@
-// Main Entry Point for Iconic Express Backend
-require('./server');
+/**
+ * Iconic Backend Entry Point (ES Modules)
+ */
+import './server.js';

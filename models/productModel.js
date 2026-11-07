@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -270,5 +270,6 @@ productSchema.pre('save', function (next) {
 
 const Product = mongoose.model('Product', productSchema);
 
-module.exports = Product;
+export default Product;
+export { Product };
 
