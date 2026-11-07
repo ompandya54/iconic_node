@@ -20,6 +20,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Enable CORS
 const allowedOrigins = [
+  'https://iconiccloaths.vercel.app',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:5173',
@@ -29,18 +30,17 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl, postman) or if wildcard / dev
-      if (
-        !origin ||
-        process.env.CLIENT_URL === '*' ||
-        allowedOrigins.includes(origin) ||
-        (origin && origin.includes('vercel.app')) ||
-        (origin && origin.includes('render.com')) ||
-        process.env.NODE_ENV !== 'production'
-      ) {
+      // Allow requests with no origin (mobile apps, curl, postman)
+      if (!origin) return callback(null, true);
+
+      // Clean origin without trailing slash
+      const cleanOrigin = origin.replace(/\/$/, '');
+      const isAllowed = allowedOrigins.some((allowed) => allowed.replace(/\/$/, '') === cleanOrigin);
+
+      if (isAllowed || (origin && origin.includes('iconiccloaths.vercel.app')) || process.env.NODE_ENV !== 'production') {
         return callback(null, true);
       }
-      return callback(new Error('Not allowed by CORS'));
+      return callback(new Error(`Not allowed by CORS: Origin ${origin} is not authorized`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
