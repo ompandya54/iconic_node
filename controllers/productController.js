@@ -174,11 +174,64 @@ const getProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  let product;
+  if (!id) {
+    res.status(400);
+    throw new Error('Product identifier is required');
+  }
+
+  let product = null;
+
+  // 1. Try by MongoDB ObjectId
   if (id.match(/^[0-9a-fA-F]{24}$/)) {
-    product = await Product.findById(id).populate('category', 'name slug');
-  } else {
-    product = await Product.findOne({ slug: id }).populate('category', 'name slug');
+    try {
+      product = await Product.findById(id);
+    } catch (e) {
+      // Ignore cast errors and proceed to slug/search
+    }
+  }
+
+  // 2. Try by Exact Slug
+  if (!product) {
+    product = await Product.findOne({ slug: id.toLowerCase().trim() });
+  }
+
+  // 3. Try by legacy or static shop-item-X ID
+  if (!product && id.startsWith('shop-item-')) {
+    const itemNum = parseInt(id.replace('shop-item-', ''), 10);
+    const shopNames = [
+      'Minimal Logo Tee',
+      'Fallen Angel Tee',
+      'Chaos Tee',
+      'Roman Art Tee',
+      'Mountain Mood Tee',
+      'Dual Logo Tee',
+      'Chaos Back Print Tee',
+      'Somewhere Better Tee',
+    ];
+    const targetName = shopNames[itemNum - 1];
+    if (targetName) {
+      product = await Product.findOne({ name: new RegExp(`^${targetName}$`, 'i') });
+    }
+
+    // Fallback: pick Nth active product
+    if (!product) {
+      const allActive = await Product.find({ isActive: true }).sort({ createdAt: -1 });
+      if (allActive.length > 0) {
+        product = allActive[(itemNum - 1) % allActive.length];
+      }
+    }
+  }
+
+  // 4. Try fuzzy match by name or cleaned slug
+  if (!product) {
+    const cleanTerm = id.replace(/[-_]/g, ' ').trim();
+    product = await Product.findOne({
+      $or: [
+        { name: { $regex: new RegExp(`^${cleanTerm}$`, 'i') } },
+        { name: { $regex: new RegExp(cleanTerm, 'i') } },
+        { slug: { $regex: new RegExp(`^${id}$`, 'i') } },
+      ],
+    });
   }
 
   if (product) {
@@ -189,14 +242,14 @@ const getProductById = asyncHandler(async (req, res) => {
       image: product.image || product.images?.[0] || product.colors?.[0]?.image || '/images/prod_minimal.jpg',
     };
 
-    res.json({
+    return res.json({
       success: true,
       product: formatted,
       data: formatted,
     });
   } else {
     res.status(404);
-    throw new Error('Product not found');
+    throw new Error(`Product not found with id or slug: ${id}`);
   }
 });
 

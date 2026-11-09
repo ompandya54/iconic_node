@@ -287,6 +287,229 @@ const iconicProducts = [
     images: ['/images/story_stairs_model.jpg', '/images/cat_collections.jpg'],
     description: 'Heavyweight 380 GSM fleece pullover hoodie with double-layer hood and custom metal eyelets.',
   },
+  {
+    name: 'Fallen Angel Tee',
+    slug: 'fallen-angel-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Front Graphic',
+    material: 'Heavyweight Cotton (260 GSM)',
+    price: 999,
+    originalPrice: 1499,
+    formattedPrice: '₹999',
+    badge: 'NEW DROP',
+    image: '/images/prod_fallenangel.jpg',
+    images: ['/images/prod_fallenangel.jpg'],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Cream', hex: '#e5e0d8', image: '/images/prod_fallenangel.jpg' },
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_fallenangel.jpg' },
+    ],
+    theme: 'Street',
+    fit: 'Oversized Fit',
+    description: 'Front angel graphic high density screen printed on 260 GSM luxury cotton.',
+  },
+  {
+    name: 'Chaos Tee',
+    slug: 'chaos-tee',
+    category: 'oversized',
+    categoryLabel: 'Oversized Tees',
+    subcategory: 'Typography',
+    material: '100% Combed Cotton (220 GSM)',
+    price: 899,
+    originalPrice: 1299,
+    formattedPrice: '₹899',
+    badge: 'HOT',
+    image: '/images/prod_discipline.jpg',
+    images: ['/images/prod_discipline.jpg'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Charcoal', hex: '#27272a', image: '/images/prod_discipline.jpg' },
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_discipline.jpg' },
+    ],
+    theme: 'Typography',
+    fit: 'Oversized Fit',
+    description: 'Chaos typography streetwear print on 220 GSM combed cotton.',
+  },
+  {
+    name: 'Roman Art Tee',
+    slug: 'roman-art-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Vintage Art',
+    material: 'Heavyweight Cotton (240 GSM)',
+    price: 999,
+    originalPrice: 1399,
+    formattedPrice: '₹999',
+    badge: 'LIMITED',
+    image: '/images/prod_romanart.jpg',
+    images: ['/images/prod_romanart.jpg'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'White', hex: '#f5f5f7', image: '/images/prod_romanart.jpg' },
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_romanart.jpg' },
+    ],
+    theme: 'Vintage',
+    fit: 'Oversized Fit',
+    description: 'Classic Roman marble sculpture artwork vintage wash screen printed on luxury cotton.',
+  },
+  {
+    name: 'Mountain Mood Tee',
+    slug: 'mountain-mood-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Abstract Print',
+    material: '100% Organic Cotton (220 GSM)',
+    price: 899,
+    originalPrice: 1299,
+    formattedPrice: '₹899',
+    badge: 'BESTSELLER',
+    image: '/images/prod_lostintime.jpg',
+    images: ['/images/prod_lostintime.jpg'],
+    sizes: ['M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_lostintime.jpg' },
+      { name: 'Cream', hex: '#e5e0d8', image: '/images/prod_lostintime.jpg' },
+    ],
+    theme: 'Abstract',
+    fit: 'Oversized Fit',
+    description: 'Serene mountain landscape abstract artwork draped across heavyweight oversized cotton.',
+  },
+  {
+    name: 'Dual Logo Tee',
+    slug: 'dual-logo-tee',
+    category: 'essentials',
+    categoryLabel: 'Essentials',
+    subcategory: 'Solid Essentials',
+    material: 'Compact Cotton (210 GSM)',
+    price: 799,
+    originalPrice: 1199,
+    formattedPrice: '₹799',
+    badge: 'ESSENTIAL',
+    image: '/images/prod_metamorphosis.jpg',
+    images: ['/images/prod_metamorphosis.jpg'],
+    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Brown', hex: '#443a35', image: '/images/prod_metamorphosis.jpg' },
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_metamorphosis.jpg' },
+    ],
+    theme: 'Minimal',
+    fit: 'Oversized Fit',
+    description: 'Subtle iconic chest logo and back collar print on compact high-thread count cotton.',
+  },
+  {
+    name: 'Chaos Back Print Tee',
+    slug: 'chaos-back-print-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Back Print',
+    material: '100% French Terry (240 GSM)',
+    price: 999,
+    originalPrice: 1499,
+    formattedPrice: '₹999',
+    badge: 'NEW DROP',
+    image: '/images/prod_urbandrift.jpg',
+    images: ['/images/prod_urbandrift.jpg'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_urbandrift.jpg' },
+      { name: 'Grey', hex: '#71717a', image: '/images/prod_urbandrift.jpg' },
+    ],
+    theme: 'Typography',
+    fit: 'Oversized Fit',
+    description: 'Oversized bold rear typography back print on luxury French Terry.',
+  },
+  {
+    name: 'Somewhere Better Tee',
+    slug: 'somewhere-better-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Front Graphic',
+    material: 'Heavyweight Cotton (260 GSM)',
+    price: 999,
+    originalPrice: 1499,
+    formattedPrice: '₹999',
+    badge: 'LIMITED',
+    image: '/images/cat_newarrivals.jpg',
+    images: ['/images/cat_newarrivals.jpg'],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'White', hex: '#f5f5f7', image: '/images/cat_newarrivals.jpg' },
+      { name: 'Black', hex: '#0a0a0a', image: '/images/cat_newarrivals.jpg' },
+    ],
+    theme: 'Street',
+    fit: 'Oversized Fit',
+    description: 'Somewhere Better nostalgic streetwear art print on premium combed cotton.',
+  },
+  {
+    name: 'Metamorphosis Tee',
+    slug: 'metamorphosis-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Front Graphic',
+    material: 'Heavyweight Cotton (240 GSM)',
+    price: 999,
+    originalPrice: 1399,
+    formattedPrice: '₹999',
+    badge: 'BESTSELLER',
+    isBestseller: true,
+    image: '/images/prod_metamorphosis.jpg',
+    images: ['/images/prod_metamorphosis.jpg'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_metamorphosis.jpg' },
+      { name: 'Sage Green', hex: '#5b6e58', image: '/images/prod_metamorphosis.jpg' },
+    ],
+    theme: 'Abstract',
+    fit: 'Oversized Fit',
+    description: 'Transformative butterfly and glitch typography oversized streetwear piece.',
+  },
+  {
+    name: 'Discipline Tee',
+    slug: 'discipline-tee',
+    category: 'oversized',
+    categoryLabel: 'Oversized Tees',
+    subcategory: 'Typography',
+    material: '100% French Terry (240 GSM)',
+    price: 899,
+    originalPrice: 1299,
+    formattedPrice: '₹899',
+    badge: 'BESTSELLER',
+    isBestseller: true,
+    image: '/images/prod_discipline.jpg',
+    images: ['/images/prod_discipline.jpg'],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_discipline.jpg' },
+      { name: 'Cream', hex: '#e5e0d8', image: '/images/prod_discipline.jpg' },
+    ],
+    theme: 'Typography',
+    fit: 'Oversized Fit',
+    description: 'Discipline equals freedom heavyweight streetwear boxy cut t-shirt.',
+  },
+  {
+    name: 'Lost In Time Tee',
+    slug: 'lost-in-time-tee',
+    category: 'graphic',
+    categoryLabel: 'Graphic Streetwear',
+    subcategory: 'Abstract Print',
+    material: 'Heavyweight Cotton (240 GSM)',
+    price: 1199,
+    originalPrice: 1699,
+    formattedPrice: '₹1,199',
+    badge: 'BESTSELLER',
+    isBestseller: true,
+    image: '/images/prod_lostintime.jpg',
+    images: ['/images/prod_lostintime.jpg'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Black', hex: '#0a0a0a', image: '/images/prod_lostintime.jpg' },
+      { name: 'White', hex: '#f5f5f7', image: '/images/prod_lostintime.jpg' },
+    ],
+    theme: 'Vintage',
+    fit: 'Oversized Fit',
+    description: 'Lost In Time surrealist hourglass and retro streetwear aesthetic print.',
+  },
 ];
 
 // Default Dynamic Sections for Landing Page
@@ -321,69 +544,73 @@ const demoSections = [
 ];
 
 /**
- * @desc    Seed database with default admin, categories, 10 iconic products & dynamic sections
- * @route   POST /api/seed
+ * @desc    Seed database with default admin, categories, iconic products & dynamic sections
+ * @route   GET /api/seed or POST /api/seed
  * @access  Public
  */
-router.post(
-  '/',
-  asyncHandler(async (req, res) => {
-    // 1. Seed Default Admin if not exists
-    let admin = await Admin.findOne({ email: 'admin@iconic.com' });
-    if (!admin) {
-      admin = await Admin.create({
-        name: 'Admin',
+const seedHandler = asyncHandler(async (req, res) => {
+  // 1. Seed Default Admin if not exists
+  let admin = await Admin.findOne({ email: 'admin@iconic.com' });
+  if (!admin) {
+    admin = await Admin.create({
+      name: 'Admin',
+      email: 'admin@iconic.com',
+      password: 'admin123',
+      role: 'admin',
+    });
+  }
+
+  // 2. Seed Categories
+  const createdCategories = [];
+  for (const cat of demoCategories) {
+    let existing = await Category.findOne({ slug: cat.slug });
+    if (!existing) {
+      existing = await Category.create(cat);
+    }
+    createdCategories.push(existing);
+  }
+
+  // 3. Seed Products
+  const createdProducts = [];
+  for (const prod of iconicProducts) {
+    let existing = await Product.findOne({ name: prod.name });
+    if (!existing) {
+      existing = await Product.create(prod);
+    }
+    createdProducts.push(existing);
+  }
+
+  // 4. Seed Dynamic Sections
+  const createdSections = [];
+  for (const sec of demoSections) {
+    let existing = await Section.findOne({ title: sec.title });
+    if (!existing) {
+      existing = await Section.create(sec);
+    }
+    createdSections.push(existing);
+  }
+
+  const totalInDb = await Product.countDocuments();
+
+  res.json({
+    success: true,
+    message: `Database seeded successfully! Total products in database: ${totalInDb}`,
+    data: {
+      admin: {
+        username: 'admin',
         email: 'admin@iconic.com',
         password: 'admin123',
-        role: 'admin',
-      });
-    }
-
-    // 2. Seed Categories
-    const createdCategories = [];
-    for (const cat of demoCategories) {
-      let existing = await Category.findOne({ slug: cat.slug });
-      if (!existing) {
-        existing = await Category.create(cat);
-      }
-      createdCategories.push(existing);
-    }
-
-    // 3. Seed Products
-    const createdProducts = [];
-    for (const prod of iconicProducts) {
-      let existing = await Product.findOne({ name: prod.name });
-      if (!existing) {
-        existing = await Product.create(prod);
-      }
-      createdProducts.push(existing);
-    }
-
-    // 4. Seed Dynamic Sections
-    const createdSections = [];
-    for (const sec of demoSections) {
-      let existing = await Section.findOne({ title: sec.title });
-      if (!existing) {
-        existing = await Section.create(sec);
-      }
-      createdSections.push(existing);
-    }
-
-    res.json({
-      success: true,
-      message: 'Database seeded successfully with 10 Iconic Streetwear products, categories, dynamic sections & admin!',
-      data: {
-        admin: {
-          username: 'admin',
-          email: 'admin@iconic.com',
-          password: 'admin123',
-        },
-        categoriesCount: createdCategories.length,
-        productsCount: createdProducts.length,
-        sectionsCount: createdSections.length,
       },
-    });
-  })
-);
+      categoriesCount: createdCategories.length,
+      productsCount: createdProducts.length,
+      sectionsCount: createdSections.length,
+      totalProductsInDB: totalInDb,
+    },
+  });
+});
+
+router.route('/')
+  .get(seedHandler)
+  .post(seedHandler);
 
 export default router;
