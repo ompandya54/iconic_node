@@ -544,6 +544,7 @@ const toggleProductStatus = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
+    product: updatedProduct,
     data: {
       _id: updatedProduct._id,
       name: updatedProduct.name,
