@@ -29,14 +29,23 @@ const adminLogin = asyncHandler(async (req, res) => {
     admin = await Admin.findOne({ email: identifier.toLowerCase() }).select('+password');
   }
 
-  // Fallback: If no admin in DB, auto-create default admin
-  if (!admin && identifier.toLowerCase() === 'admin' && (password === 'admin123' || password === 'adminpassword123')) {
-    admin = await Admin.create({
-      name: 'Admin',
-      email: 'admin@iconic.com',
-      password: password,
-      role: 'admin',
-    });
+  // Fallback: If no admin in DB, auto-create default admin or test admin
+  if (!admin) {
+    if (identifier.toLowerCase() === 'test@gmail.com' && password === 'Test@123') {
+      admin = await Admin.create({
+        name: 'Iconic Admin',
+        email: 'test@gmail.com',
+        password: 'Test@123',
+        role: 'admin',
+      });
+    } else if (identifier.toLowerCase() === 'admin' && (password === 'admin123' || password === 'adminpassword123')) {
+      admin = await Admin.create({
+        name: 'Admin',
+        email: 'admin@iconic.com',
+        password: password,
+        role: 'admin',
+      });
+    }
   }
 
   if (admin && (await admin.matchPassword(password))) {
