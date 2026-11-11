@@ -319,15 +319,19 @@ const getProductAttributes = asyncHandler(async (req, res) => {
  */
 const getBestsellers = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 8;
-  const products = await Product.find({ isBestseller: true, isActive: true })
+  const products = await Product.find({
+    $or: [{ isBestseller: true }, { badge: /bestseller/i }],
+    isActive: { $ne: false },
+  })
     .populate('category', 'name slug')
+    .sort({ rating: -1, createdAt: -1 })
     .limit(limit)
     .lean();
 
-  // Fallback: If not enough bestsellers marked, fetch highest rated or most recent
+  // Fallback: If not enough bestsellers marked, fetch active products
   if (products.length < limit) {
     const fallbackProducts = await Product.find({
-      isActive: true,
+      isActive: { $ne: false },
       _id: { $nin: products.map((p) => p._id) },
     })
       .sort({ rating: -1, createdAt: -1 })
@@ -336,9 +340,19 @@ const getBestsellers = asyncHandler(async (req, res) => {
     products.push(...fallbackProducts);
   }
 
+  // Format products with id string, formattedPrice, and image for frontend compatibility
+  const formatted = products.map((p) => ({
+    ...p,
+    id: (p._id || p.id).toString(),
+    formattedPrice: p.formattedPrice || `₹${(Number(p.price) || 0).toLocaleString('en-IN')}`,
+    image: (p.image || p.images?.[0] || p.colors?.[0]?.image || '/images/prod_minimal.jpg').replace(/^http:\/\//i, 'https://'),
+  }));
+
   res.json({
     success: true,
-    data: products,
+    count: formatted.length,
+    products: formatted,
+    data: formatted,
   });
 });
 
@@ -349,14 +363,38 @@ const getBestsellers = asyncHandler(async (req, res) => {
  */
 const getFeaturedProducts = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 8;
-  const products = await Product.find({ isFeatured: true, isActive: true })
+  const products = await Product.find({
+    $or: [{ isFeatured: true }, { badge: /featured/i }],
+    isActive: { $ne: false },
+  })
     .populate('category', 'name slug')
+    .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
 
+  if (products.length < limit) {
+    const fallbackProducts = await Product.find({
+      isActive: { $ne: false },
+      _id: { $nin: products.map((p) => p._id) },
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit - products.length)
+      .lean();
+    products.push(...fallbackProducts);
+  }
+
+  const formatted = products.map((p) => ({
+    ...p,
+    id: (p._id || p.id).toString(),
+    formattedPrice: p.formattedPrice || `₹${(Number(p.price) || 0).toLocaleString('en-IN')}`,
+    image: (p.image || p.images?.[0] || p.colors?.[0]?.image || '/images/prod_minimal.jpg').replace(/^http:\/\//i, 'https://'),
+  }));
+
   res.json({
     success: true,
-    data: products,
+    count: formatted.length,
+    products: formatted,
+    data: formatted,
   });
 });
 
@@ -635,25 +673,39 @@ const bulkProductAction = asyncHandler(async (req, res) => {
  */
 const getNewArrivals = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 8;
-  const products = await Product.find({ isNewArrival: true, isActive: true })
+  const products = await Product.find({
+    $or: [{ isNewArrival: true }, { badge: /new/i }],
+    isActive: { $ne: false },
+  })
     .populate('category', 'name slug')
     .sort({ createdAt: -1 })
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   // Fallback if not enough tagged as new arrivals
   if (products.length < limit) {
     const fallbackProducts = await Product.find({
-      isActive: true,
+      isActive: { $ne: false },
       _id: { $nin: products.map((p) => p._id) },
     })
       .sort({ createdAt: -1 })
-      .limit(limit - products.length);
+      .limit(limit - products.length)
+      .lean();
     products.push(...fallbackProducts);
   }
 
+  const formatted = products.map((p) => ({
+    ...p,
+    id: (p._id || p.id).toString(),
+    formattedPrice: p.formattedPrice || `₹${(Number(p.price) || 0).toLocaleString('en-IN')}`,
+    image: (p.image || p.images?.[0] || p.colors?.[0]?.image || '/images/prod_minimal.jpg').replace(/^http:\/\//i, 'https://'),
+  }));
+
   res.json({
     success: true,
-    data: products,
+    count: formatted.length,
+    products: formatted,
+    data: formatted,
   });
 });
 
