@@ -579,6 +579,56 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Bulk action on products (delete, activate, deactivate)
+ * @route   POST /api/products/bulk-action
+ * @access  Private/Admin
+ */
+const bulkProductAction = asyncHandler(async (req, res) => {
+  const { action, ids } = req.body;
+
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    res.status(400);
+    throw new Error('Please provide an array of product IDs');
+  }
+
+  if (action === 'delete') {
+    const result = await Product.deleteMany({ _id: { $in: ids } });
+    return res.json({
+      success: true,
+      message: `Successfully deleted ${result.deletedCount} products`,
+      deletedCount: result.deletedCount,
+    });
+  }
+
+  if (action === 'activate') {
+    const result = await Product.updateMany(
+      { _id: { $in: ids } },
+      { $set: { isActive: true } }
+    );
+    return res.json({
+      success: true,
+      message: `Successfully activated ${result.modifiedCount} products`,
+      modifiedCount: result.modifiedCount,
+    });
+  }
+
+  if (action === 'deactivate') {
+    const result = await Product.updateMany(
+      { _id: { $in: ids } },
+      { $set: { isActive: false } }
+    );
+    return res.json({
+      success: true,
+      message: `Successfully deactivated ${result.modifiedCount} products`,
+      modifiedCount: result.modifiedCount,
+    });
+  }
+
+  res.status(400);
+  throw new Error('Invalid bulk action. Allowed: delete, activate, deactivate');
+});
+
+/**
  * @desc    Get new arrival products (Drops / Latest)
  * @route   GET /api/products/new-arrivals
  * @access  Public
@@ -768,6 +818,7 @@ export {
   createProduct,
   updateProduct,
   deleteProduct,
+  bulkProductAction,
   toggleProductStatus,
   createProductReview,
 };
@@ -784,6 +835,7 @@ export default {
   createProduct,
   updateProduct,
   deleteProduct,
+  bulkProductAction,
   toggleProductStatus,
   createProductReview,
 };

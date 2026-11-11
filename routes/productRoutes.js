@@ -11,6 +11,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  bulkProductAction,
   toggleProductStatus,
   createProductReview,
 } from '../controllers/productController.js';
@@ -24,6 +25,7 @@ router.get('/bestsellers', getBestsellers);
 router.get('/featured', getFeaturedProducts);
 router.get('/new-arrivals', getNewArrivals);
 router.get('/admin/all', protectAdmin, getAdminProducts);
+router.post('/bulk-action', protectAdmin, bulkProductAction);
 
 router
   .route('/')
