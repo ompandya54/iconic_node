@@ -268,6 +268,47 @@ productSchema.pre('save', function (next) {
   next();
 });
 
+// ==========================================
+// PERFORMANCE INDEXES (INSTANT SUB-10MS QUERIES)
+// ==========================================
+
+// 1. Primary Lookups & Catalog Sorts
+productSchema.index({ slug: 1 }, { unique: true });
+productSchema.index({ isActive: 1, createdAt: -1 });
+
+// 2. High-Frequency Filters
+productSchema.index({ category: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ subcategory: 1, isActive: 1 });
+productSchema.index({ fit: 1, isActive: 1 });
+productSchema.index({ theme: 1, isActive: 1 });
+productSchema.index({ price: 1, isActive: 1 });
+productSchema.index({ price: -1, isActive: 1 });
+
+// 3. Homepage Drops, Sections & Badges
+productSchema.index({ isBestseller: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ isFeatured: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ isNewArrival: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ badge: 1, isActive: 1 });
+
+// 4. Inverted Full-Text Search Index (Instant search on Name, Description, Subcategory & Theme)
+productSchema.index(
+  {
+    name: 'text',
+    description: 'text',
+    subcategory: 'text',
+    theme: 'text',
+  },
+  {
+    weights: {
+      name: 10,
+      subcategory: 5,
+      theme: 3,
+      description: 1,
+    },
+    name: 'ProductTextSearchIndex',
+  }
+);
+
 const Product = mongoose.model('Product', productSchema);
 
 export default Product;

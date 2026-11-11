@@ -184,15 +184,15 @@ const getProductById = asyncHandler(async (req, res) => {
   // 1. Try by MongoDB ObjectId
   if (id.match(/^[0-9a-fA-F]{24}$/)) {
     try {
-      product = await Product.findById(id);
+      product = await Product.findById(id).lean();
     } catch (e) {
       // Ignore cast errors and proceed to slug/search
     }
   }
 
-  // 2. Try by Exact Slug
+  // 2. Try by Exact Slug (Indexed - instant lookup)
   if (!product) {
-    product = await Product.findOne({ slug: id.toLowerCase().trim() });
+    product = await Product.findOne({ slug: id.toLowerCase().trim() }).lean();
   }
 
   // 3. Try by legacy or static shop-item-X ID
@@ -210,12 +210,12 @@ const getProductById = asyncHandler(async (req, res) => {
     ];
     const targetName = shopNames[itemNum - 1];
     if (targetName) {
-      product = await Product.findOne({ name: new RegExp(`^${targetName}$`, 'i') });
+      product = await Product.findOne({ name: new RegExp(`^${targetName}$`, 'i') }).lean();
     }
 
     // Fallback: pick Nth active product
     if (!product) {
-      const allActive = await Product.find({ isActive: true }).sort({ createdAt: -1 });
+      const allActive = await Product.find({ isActive: true }).sort({ createdAt: -1 }).lean();
       if (allActive.length > 0) {
         product = allActive[(itemNum - 1) % allActive.length];
       }
@@ -231,12 +231,12 @@ const getProductById = asyncHandler(async (req, res) => {
         { name: { $regex: new RegExp(cleanTerm, 'i') } },
         { slug: { $regex: new RegExp(`^${id}$`, 'i') } },
       ],
-    });
+    }).lean();
   }
 
   if (product) {
     const formatted = {
-      ...product.toObject(),
+      ...product,
       id: product._id.toString(),
       formattedPrice: product.formattedPrice || `₹${(Number(product.price) || 0).toLocaleString('en-IN')}`,
       image: product.image || product.images?.[0] || product.colors?.[0]?.image || '/images/prod_minimal.jpg',
@@ -321,7 +321,8 @@ const getBestsellers = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 8;
   const products = await Product.find({ isBestseller: true, isActive: true })
     .populate('category', 'name slug')
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   // Fallback: If not enough bestsellers marked, fetch highest rated or most recent
   if (products.length < limit) {
@@ -330,7 +331,8 @@ const getBestsellers = asyncHandler(async (req, res) => {
       _id: { $nin: products.map((p) => p._id) },
     })
       .sort({ rating: -1, createdAt: -1 })
-      .limit(limit - products.length);
+      .limit(limit - products.length)
+      .lean();
     products.push(...fallbackProducts);
   }
 
@@ -349,7 +351,8 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 8;
   const products = await Product.find({ isFeatured: true, isActive: true })
     .populate('category', 'name slug')
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   res.json({
     success: true,
