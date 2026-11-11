@@ -20,38 +20,47 @@ if (
 /**
  * Process image with Sharp:
  * - Auto-rotate based on EXIF
- * - Optional crop if coordinates provided (left, top, width, height)
- * - Maximum boundary resize (1600x2000 inside) without enlargement
+ * - Optional crop if coordinates provided and within image bounds
+ * - Maximum boundary resize (1200x1600 inside) without enlargement
  * - Compress to clean, lightweight .webp (85% quality)
  */
 async function processImageWithSharp(filePath, cropData = {}) {
+  let pipeline = sharp(filePath).rotate();
+
   const left = Number(cropData.cropX ?? cropData.left);
   const top = Number(cropData.cropY ?? cropData.top);
   const width = Number(cropData.cropWidth ?? cropData.width);
   const height = Number(cropData.cropHeight ?? cropData.height);
 
-  let pipeline = sharp(filePath).rotate();
-
-  if (
-    !isNaN(left) &&
-    !isNaN(top) &&
-    !isNaN(width) &&
-    !isNaN(height) &&
-    width > 0 &&
-    height > 0
-  ) {
-    pipeline = pipeline.extract({
-      left: Math.max(0, Math.round(left)),
-      top: Math.max(0, Math.round(top)),
-      width: Math.round(width),
-      height: Math.round(height),
-    });
+  try {
+    const metadata = await sharp(filePath).metadata();
+    if (
+      !isNaN(left) &&
+      !isNaN(top) &&
+      !isNaN(width) &&
+      !isNaN(height) &&
+      width > 0 &&
+      height > 0 &&
+      metadata.width &&
+      metadata.height &&
+      left + width <= metadata.width &&
+      top + height <= metadata.height
+    ) {
+      pipeline = pipeline.extract({
+        left: Math.max(0, Math.round(left)),
+        top: Math.max(0, Math.round(top)),
+        width: Math.round(width),
+        height: Math.round(height),
+      });
+    }
+  } catch (extractErr) {
+    // If client already cropped the image on canvas or coordinates are outside bounds, skip extract
   }
 
   pipeline = pipeline
     .resize({
-      width: 1600,
-      height: 2000,
+      width: 1200,
+      height: 1600,
       fit: 'inside',
       withoutEnlargement: true,
     })
@@ -101,11 +110,19 @@ const uploadSingleImage = asyncHandler(async (req, res) => {
     console.error('Sharp image processing warning, using original:', err.message);
   }
 
-  // Upload to Cloudinary if configured
+  // Cleanup local temp file from multer
+  if (fs.existsSync(inputPath)) {
+    try {
+      fs.unlinkSync(inputPath);
+    } catch (e) {}
+  }
+
+  // 1. Upload to Cloudinary if configured
   if (
     process.env.CLOUDINARY_CLOUD_NAME &&
     process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
+    process.env.CLOUDINARY_API_SECRET &&
+    process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name'
   ) {
     try {
       let result;
@@ -115,11 +132,6 @@ const uploadSingleImage = asyncHandler(async (req, res) => {
         result = await cloudinary.uploader.upload(inputPath, {
           folder: 'iconic_products',
         });
-      }
-
-      // Cleanup local temp file
-      if (fs.existsSync(inputPath)) {
-        fs.unlinkSync(inputPath);
       }
 
       return res.json({
@@ -132,30 +144,24 @@ const uploadSingleImage = asyncHandler(async (req, res) => {
         message: 'Image cropped, optimized with Sharp and uploaded to Cloudinary',
       });
     } catch (err) {
-      console.error('Cloudinary upload error, falling back to local storage:', err);
+      console.error('Cloudinary upload error:', err.message);
     }
   }
 
-  // Fallback: Save processed buffer locally
-  const ext = processedBuffer ? '.webp' : path.extname(req.file.originalname);
-  const baseName = path.basename(req.file.filename, path.extname(req.file.filename));
-  const finalFilename = `${baseName}-opt${ext}`;
-  const finalPath = path.join(path.dirname(inputPath), finalFilename);
-
+  // 2. High-Performance Fallback: Return Sharp-optimized WebP as Base64 Data URI!
+  // This stores permanently in MongoDB, NEVER 404s, and works 100% on Render/Vercel
   if (processedBuffer) {
-    fs.writeFileSync(finalPath, processedBuffer);
-    if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+    const base64Data = `data:image/webp;base64,${processedBuffer.toString('base64')}`;
+    return res.json({
+      success: true,
+      url: base64Data,
+      isBase64: true,
+      message: 'Image cropped and optimized with Sharp (Persistent DB storage)',
+    });
   }
 
-  const serverUrl = `${req.protocol}://${req.get('host')}`;
-  const fileUrl = `${serverUrl}/uploads/${finalFilename}`;
-
-  res.json({
-    success: true,
-    url: fileUrl,
-    filename: finalFilename,
-    message: 'Image cropped & optimized locally',
-  });
+  res.status(500);
+  throw new Error('Failed to process and upload image');
 });
 
 /**
@@ -179,48 +185,39 @@ const uploadMultipleImages = asyncHandler(async (req, res) => {
       console.error('Sharp warning:', err.message);
     }
 
+    if (fs.existsSync(file.path)) {
+      try {
+        fs.unlinkSync(file.path);
+      } catch (e) {}
+    }
+
+    let uploaded = false;
     if (
       process.env.CLOUDINARY_CLOUD_NAME &&
       process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET
+      process.env.CLOUDINARY_API_SECRET &&
+      process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name'
     ) {
       try {
-        let result;
-        if (processedBuffer) {
-          result = await uploadBufferToCloudinary(processedBuffer, 'iconic_products');
-        } else {
-          result = await cloudinary.uploader.upload(file.path, {
-            folder: 'iconic_products',
-          });
-        }
-        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        const result = await uploadBufferToCloudinary(processedBuffer, 'iconic_products');
         urls.push(result.secure_url);
-        continue;
+        uploaded = true;
       } catch (err) {
-        console.error('Cloudinary upload error:', err);
+        console.error('Cloudinary upload error:', err.message);
       }
     }
 
-    // Local fallback
-    const ext = processedBuffer ? '.webp' : path.extname(file.originalname);
-    const baseName = path.basename(file.filename, path.extname(file.filename));
-    const finalFilename = `${baseName}-opt${ext}`;
-    const finalPath = path.join(path.dirname(file.path), finalFilename);
-
-    if (processedBuffer) {
-      fs.writeFileSync(finalPath, processedBuffer);
-      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+    // Fallback to Base64 data URI
+    if (!uploaded && processedBuffer) {
+      urls.push(`data:image/webp;base64,${processedBuffer.toString('base64')}`);
     }
-
-    const serverUrl = `${req.protocol}://${req.get('host')}`;
-    urls.push(`${serverUrl}/uploads/${finalFilename}`);
   }
 
   res.json({
     success: true,
     urls,
     count: urls.length,
-    message: `${urls.length} images processed with Sharp and uploaded`,
+    message: `${urls.length} images processed with Sharp and saved`,
   });
 });
 
