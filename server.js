@@ -13,6 +13,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import sectionRoutes from './routes/sectionRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import attributeRoutes from './routes/attributeRoutes.js';
 import seedRoutes from './routes/seedRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 
@@ -88,6 +89,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/sections', sectionRoutes);
+app.use('/api/attributes', attributeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/seed', seedRoutes);
 
