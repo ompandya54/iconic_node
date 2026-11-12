@@ -12,20 +12,40 @@ const sectionSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    // Multi-variable targeting criteria (optional dropdowns)
+    category: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    fit: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    theme: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    collectionName: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    // Legacy single filter support
     filterType: {
       type: String,
-      required: [true, 'Please select filter type'],
-      enum: ['fit', 'theme', 'material', 'badge', 'category', 'discount', 'underPrice', 'custom'],
-      default: 'fit',
+      default: '',
     },
     filterValue: {
       type: String,
-      required: [true, 'Please provide filter value (e.g., Oversized Fit, 40, 999, etc.)'],
+      default: '',
       trim: true,
     },
     bannerImage: {
       type: String,
-      default: '', // Optional promotional banner for the drop/sale
+      default: '',
     },
     badgeText: {
       type: String,
@@ -33,7 +53,7 @@ const sectionSchema = new mongoose.Schema(
     },
     countdownEndsAt: {
       type: Date,
-      default: null, // For countdown timers (e.g., Midnight Drop / Flash Sale)
+      default: null,
     },
     limit: {
       type: Number,
@@ -45,7 +65,7 @@ const sectionSchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true, // Toggle this ON or OFF from Admin
+      default: true,
     },
   },
   {

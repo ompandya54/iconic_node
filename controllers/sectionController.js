@@ -12,30 +12,75 @@ const getActiveSectionsWithProducts = asyncHandler(async (req, res) => {
 
   const populatedSections = await Promise.all(
     sections.map(async (sec) => {
-      const query = { isActive: true };
+      // Build conditions array for multi-variable filtering
+      const conditions = [{ isActive: true }];
 
-      if (sec.filterType === 'discount') {
-        const minDiscount = Number(sec.filterValue) || 10;
-        query.discount = { $gte: minDiscount };
-      } else if (sec.filterType === 'underPrice') {
-        const maxP = Number(sec.filterValue) || 999;
-        query.price = { $lte: maxP };
-      } else if (sec.filterType === 'category') {
-        query.$or = [
-          { category: { $regex: new RegExp(`^${sec.filterValue}$`, 'i') } },
-          { categoryName: { $regex: new RegExp(`^${sec.filterValue}$`, 'i') } },
-        ];
-      } else if (sec.filterType === 'badge') {
-        query.badge = { $regex: new RegExp(`^${sec.filterValue}$`, 'i') };
-      } else if (sec.filterType === 'fit') {
-        query.fit = { $regex: new RegExp(sec.filterValue, 'i') };
-      } else if (sec.filterType === 'theme') {
-        query.theme = { $regex: new RegExp(sec.filterValue, 'i') };
-      } else if (sec.filterType === 'material') {
-        query.material = { $regex: new RegExp(sec.filterValue, 'i') };
+      // 1. Category Filter (Optional)
+      if (sec.category && sec.category.trim() && sec.category !== 'all') {
+        const cleanCat = sec.category.trim();
+        conditions.push({
+          $or: [
+            { category: { $regex: new RegExp(`^${cleanCat}$`, 'i') } },
+            { categoryName: { $regex: new RegExp(`^${cleanCat}$`, 'i') } },
+            { categoryLabel: { $regex: new RegExp(`^${cleanCat}$`, 'i') } },
+          ],
+        });
       }
 
-      const products = await Product.find(query)
+      // 2. Fit Style Filter (Optional)
+      if (sec.fit && sec.fit.trim() && sec.fit !== 'all') {
+        conditions.push({
+          fit: { $regex: new RegExp(`^${sec.fit.trim()}$`, 'i') },
+        });
+      }
+
+      // 3. Theme Filter (Optional)
+      if (sec.theme && sec.theme.trim() && sec.theme !== 'all') {
+        conditions.push({
+          theme: { $regex: new RegExp(`^${sec.theme.trim()}$`, 'i') },
+        });
+      }
+
+      // 4. Collection Filter (Optional)
+      if (sec.collectionName && sec.collectionName.trim() && sec.collectionName !== 'all') {
+        const cleanColl = sec.collectionName.trim();
+        conditions.push({
+          $or: [
+            { collectionName: { $regex: new RegExp(`^${cleanColl}$`, 'i') } },
+            { subcategory: { $regex: new RegExp(`^${cleanColl}$`, 'i') } },
+          ],
+        });
+      }
+
+      // 5. Legacy single filter fallback if none of the 4 multi-criteria were specified
+      if (conditions.length === 1 && sec.filterType && sec.filterValue) {
+        if (sec.filterType === 'discount') {
+          const minDiscount = Number(sec.filterValue) || 10;
+          conditions.push({ discount: { $gte: minDiscount } });
+        } else if (sec.filterType === 'underPrice') {
+          const maxP = Number(sec.filterValue) || 999;
+          conditions.push({ price: { $lte: maxP } });
+        } else if (sec.filterType === 'category') {
+          conditions.push({
+            $or: [
+              { category: { $regex: new RegExp(`^${sec.filterValue}$`, 'i') } },
+              { categoryName: { $regex: new RegExp(`^${sec.filterValue}$`, 'i') } },
+            ],
+          });
+        } else if (sec.filterType === 'badge') {
+          conditions.push({ badge: { $regex: new RegExp(`^${sec.filterValue}$`, 'i') } });
+        } else if (sec.filterType === 'fit') {
+          conditions.push({ fit: { $regex: new RegExp(sec.filterValue, 'i') } });
+        } else if (sec.filterType === 'theme') {
+          conditions.push({ theme: { $regex: new RegExp(sec.filterValue, 'i') } });
+        } else if (sec.filterType === 'material') {
+          conditions.push({ material: { $regex: new RegExp(sec.filterValue, 'i') } });
+        }
+      }
+
+      const finalQuery = conditions.length === 1 ? conditions[0] : { $and: conditions };
+
+      const products = await Product.find(finalQuery)
         .sort({ discount: -1, isBestseller: -1, createdAt: -1 })
         .limit(sec.limit || 8)
         .lean();
@@ -52,8 +97,12 @@ const getActiveSectionsWithProducts = asyncHandler(async (req, res) => {
         id: sec._id.toString(),
         title: sec.title,
         subtitle: sec.subtitle,
-        filterType: sec.filterType,
-        filterValue: sec.filterValue,
+        category: sec.category || '',
+        fit: sec.fit || '',
+        theme: sec.theme || '',
+        collectionName: sec.collectionName || '',
+        filterType: sec.filterType || '',
+        filterValue: sec.filterValue || '',
         bannerImage: sec.bannerImage || '',
         badgeText: sec.badgeText || '',
         countdownEndsAt: sec.countdownEndsAt || null,
@@ -102,6 +151,10 @@ const createSection = asyncHandler(async (req, res) => {
   const {
     title,
     subtitle,
+    category,
+    fit,
+    theme,
+    collectionName,
     filterType,
     filterValue,
     bannerImage,
@@ -112,18 +165,22 @@ const createSection = asyncHandler(async (req, res) => {
     isActive,
   } = req.body;
 
-  if (!title || !filterType || !filterValue) {
+  if (!title || !title.trim()) {
     res.status(400);
-    throw new Error('Please provide title, filterType (fit/theme/material/badge/category/discount/underPrice), and filterValue');
+    throw new Error('Please provide a section title');
   }
 
   const section = await Section.create({
-    title,
-    subtitle: subtitle || '',
-    filterType,
-    filterValue,
+    title: title.trim(),
+    subtitle: subtitle ? subtitle.trim() : '',
+    category: category && category !== 'all' ? category.trim() : '',
+    fit: fit && fit !== 'all' ? fit.trim() : '',
+    theme: theme && theme !== 'all' ? theme.trim() : '',
+    collectionName: collectionName && collectionName !== 'all' ? collectionName.trim() : '',
+    filterType: filterType || '',
+    filterValue: filterValue ? filterValue.trim() : '',
     bannerImage: bannerImage || '',
-    badgeText: badgeText || '',
+    badgeText: badgeText ? badgeText.trim() : '',
     countdownEndsAt: countdownEndsAt ? new Date(countdownEndsAt) : null,
     limit: limit ? Number(limit) : 8,
     displayOrder: displayOrder ? Number(displayOrder) : 0,
@@ -154,6 +211,10 @@ const updateSection = asyncHandler(async (req, res) => {
   const fields = [
     'title',
     'subtitle',
+    'category',
+    'fit',
+    'theme',
+    'collectionName',
     'filterType',
     'filterValue',
     'bannerImage',
@@ -165,7 +226,11 @@ const updateSection = asyncHandler(async (req, res) => {
   ];
   fields.forEach((field) => {
     if (req.body[field] !== undefined) {
-      section[field] = req.body[field];
+      if (['category', 'fit', 'theme', 'collectionName'].includes(field)) {
+        section[field] = req.body[field] === 'all' ? '' : req.body[field];
+      } else {
+        section[field] = req.body[field];
+      }
     }
   });
 
@@ -180,7 +245,7 @@ const updateSection = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Toggle section Active/Inactive status (Admin)
+ * @desc    Toggle section active/inactive status (Admin)
  * @route   PATCH /api/sections/:id/toggle
  * @access  Private/Admin
  */
@@ -197,9 +262,8 @@ const toggleSectionStatus = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    section,
-    data: section,
-    message: `Section "${section.title}" is now ${section.isActive ? 'Active (Visible on Landing Page)' : 'Inactive (Hidden)'}`,
+    isActive: section.isActive,
+    message: `Section "${section.title}" is now ${section.isActive ? 'ACTIVE' : 'DRAFT'}`,
   });
 });
 
@@ -220,7 +284,7 @@ const deleteSection = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    message: 'Section deleted successfully',
+    message: `Section "${section.title}" deleted successfully`,
   });
 });
 
@@ -232,13 +296,3 @@ export {
   toggleSectionStatus,
   deleteSection,
 };
-
-export default {
-  getActiveSectionsWithProducts,
-  getAllSections,
-  createSection,
-  updateSection,
-  toggleSectionStatus,
-  deleteSection,
-};
-
