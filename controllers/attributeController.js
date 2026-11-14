@@ -45,9 +45,15 @@ export const DEFAULT_ATTRIBUTES = [
   { type: 'size', name: 'XXL', order: 6 },
   { type: 'size', name: '3XL', order: 7 },
 
-  // COLORS (Default to Pitch Black & Pure White)
+  // COLORS (Streetwear Palette Presets)
   { type: 'color', name: 'Pitch Black', value: '#0a0a0c', order: 1 },
   { type: 'color', name: 'Pure White', value: '#ffffff', order: 2 },
+  { type: 'color', name: 'Vintage Charcoal', value: '#27272a', order: 3 },
+  { type: 'color', name: 'Acid Grey', value: '#71717a', order: 4 },
+  { type: 'color', name: 'Slate Blue', value: '#334155', order: 5 },
+  { type: 'color', name: 'Crimson Red', value: '#dc2626', order: 6 },
+  { type: 'color', name: 'Forest Green', value: '#166534', order: 7 },
+  { type: 'color', name: 'Sand Dune', value: '#d6c7a1', order: 8 },
 
   // COLLECTIONS
   { type: 'collection', name: 'Drop 01 - Heavyweight', order: 1 },

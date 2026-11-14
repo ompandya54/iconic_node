@@ -224,11 +224,28 @@ productSchema.pre('save', function (next) {
       this.price = Math.min(...validPrices);
     }
 
-    // Auto-sync available sizes & colors from variants
+    // Auto-sync available sizes & colors from variants while preserving rich color objects ({ name, hex, image })
     const uniqueSizes = [...new Set(this.variants.map((v) => v.size).filter(Boolean))];
-    const uniqueColors = [...new Set(this.variants.map((v) => v.color).filter(Boolean))];
+    const uniqueVariantColorNames = [...new Set(this.variants.map((v) => v.color).filter(Boolean))];
     if (uniqueSizes.length > 0) this.sizes = uniqueSizes;
-    if (uniqueColors.length > 0) this.colors = uniqueColors;
+
+    const hasRichColorObjects = Array.isArray(this.colors) && this.colors.length > 0 && typeof this.colors[0] === 'object' && this.colors[0]?.name;
+
+    if (hasRichColorObjects) {
+      // Preserve existing rich colorways and their custom hex codes and images
+      const existingMap = new Map(this.colors.map((c) => [(c.name || '').toLowerCase(), c]));
+      uniqueVariantColorNames.forEach((cName) => {
+        if (cName && !existingMap.has(cName.toLowerCase())) {
+          this.colors.push({ name: cName, hex: '#000000', image: '' });
+        }
+      });
+    } else if (uniqueVariantColorNames.length > 0) {
+      this.colors = uniqueVariantColorNames.map((cName) => ({
+        name: cName,
+        hex: '#000000',
+        image: '',
+      }));
+    }
 
     // Calculate variant discounts
     this.variants.forEach((v) => {
