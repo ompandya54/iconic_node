@@ -45,12 +45,9 @@ export const DEFAULT_ATTRIBUTES = [
   { type: 'size', name: 'XXL', order: 6 },
   { type: 'size', name: '3XL', order: 7 },
 
-  // COLORS
+  // COLORS (Default to Pitch Black & Pure White)
   { type: 'color', name: 'Pitch Black', value: '#0a0a0c', order: 1 },
   { type: 'color', name: 'Pure White', value: '#ffffff', order: 2 },
-  { type: 'color', name: 'Vintage Charcoal', value: '#24252a', order: 3 },
-  { type: 'color', name: 'Acid Grey', value: '#4a4b52', order: 4 },
-  { type: 'color', name: 'Slate Blue', value: '#25344d', order: 5 },
 
   // COLLECTIONS
   { type: 'collection', name: 'Drop 01 - Heavyweight', order: 1 },
