@@ -712,7 +712,7 @@ const getNewArrivals = asyncHandler(async (req, res) => {
  */
 const getRelatedProducts = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const limit = Number(req.query.limit) || 4;
+  const limit = Math.min(Number(req.query.limit) || 20, 50);
 
   const currentProduct = id.match(/^[0-9a-fA-F]{24}$/)
     ? await Product.findById(id)
@@ -723,30 +723,52 @@ const getRelatedProducts = asyncHandler(async (req, res) => {
     throw new Error('Product not found');
   }
 
-  // Find products in same category or categoryName, excluding current
-  const query = {
+  // 1. First priority: products in same category or categoryName, excluding current
+  const baseFilter = {
     _id: { $ne: currentProduct._id },
+    isActive: { $ne: false },
   };
 
-  if (currentProduct.category) {
-    query.category = currentProduct.category;
-  } else if (currentProduct.categoryName) {
-    query.categoryName = currentProduct.categoryName;
+  const categoryQuery = {
+    ...baseFilter,
+    $or: [
+      ...(currentProduct.category ? [{ category: currentProduct.category }] : []),
+      ...(currentProduct.categoryName ? [{ categoryName: currentProduct.categoryName }] : []),
+      ...(currentProduct.theme ? [{ theme: currentProduct.theme }] : []),
+      ...(currentProduct.fit ? [{ fit: currentProduct.fit }] : []),
+    ],
+  };
+
+  let related = [];
+  if (categoryQuery.$or.length > 0) {
+    related = await Product.find(categoryQuery).limit(limit).lean();
   }
 
-  let related = await Product.find(query).limit(limit);
-
-  // Fallback if less than limit
+  // 2. Fallback if fewer than limit: fill with other active products
   if (related.length < limit) {
-    const moreProducts = await Product.find({
-      _id: { $nin: [currentProduct._id, ...related.map((p) => p._id)] },
-    }).limit(limit - related.length);
-    related.push(...moreProducts);
+    const existingIds = [currentProduct._id, ...related.map((p) => p._id)];
+    const fallbackProducts = await Product.find({
+      _id: { $nin: existingIds },
+      isActive: { $ne: false },
+    })
+      .limit(limit - related.length)
+      .lean();
+
+    related.push(...fallbackProducts);
   }
+
+  // Format products consistently for frontend
+  const formatted = related.map((p) => ({
+    ...p,
+    id: p._id.toString(),
+    formattedPrice: p.formattedPrice || `₹${(Number(p.price) || 0).toLocaleString('en-IN')}`,
+    image: p.image || p.images?.[0] || p.colors?.[0]?.image || '/images/prod_minimal.jpg',
+  }));
 
   res.json({
     success: true,
-    data: related,
+    count: formatted.length,
+    data: formatted,
   });
 });
 
