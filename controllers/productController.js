@@ -244,7 +244,6 @@ const getProductById = asyncHandler(async (req, res) => {
 
     return res.json({
       success: true,
-      product: formatted,
       data: formatted,
     });
   } else {
@@ -487,7 +486,6 @@ const createProduct = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    product: formatted,
     data: formatted,
     message: 'Product created successfully',
   });
@@ -561,7 +559,6 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    product: formatted,
     data: formatted,
     message: 'Product updated successfully',
   });
@@ -585,7 +582,6 @@ const toggleProductStatus = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    product: updatedProduct,
     data: {
       _id: updatedProduct._id,
       name: updatedProduct.name,
