@@ -151,10 +151,7 @@ const productSchema = new mongoose.Schema(
     },
     colors: {
       type: mongoose.Schema.Types.Mixed,
-      default: [
-        { name: 'Black', hex: '#0a0a0a' },
-        { name: 'White', hex: '#f5f5f7' },
-      ],
+      default: [],
     },
     stock: {
       type: Number,

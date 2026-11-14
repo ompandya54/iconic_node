@@ -462,10 +462,7 @@ const createProduct = asyncHandler(async (req, res) => {
     image: image || (Array.isArray(images) && images[0]) || '/images/prod_minimal.jpg',
     images: Array.isArray(images) ? images : image ? [image] : ['/images/prod_minimal.jpg'],
     sizes: sizes || ['S', 'M', 'L', 'XL'],
-    colors: colors || [
-      { name: 'Black', hex: '#0a0a0a' },
-      { name: 'White', hex: '#f5f5f7' },
-    ],
+    colors: Array.isArray(colors) && colors.length > 0 ? colors : (colors || []),
     stock: stock !== undefined ? Number(stock) : 50,
     hasVariants: Boolean(hasVariants || (variants && variants.length > 0)),
     variants: Array.isArray(variants) ? variants : [],
@@ -547,6 +544,12 @@ const updateProduct = asyncHandler(async (req, res) => {
       '-' +
       Math.floor(1000 + Math.random() * 9000);
   }
+
+  // Force Mongoose to persist Mixed and nested array mutations
+  product.markModified('colors');
+  product.markModified('variants');
+  product.markModified('sizes');
+  product.markModified('images');
 
   const updatedProduct = await product.save();
 
