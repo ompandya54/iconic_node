@@ -140,8 +140,20 @@ const getProducts = asyncHandler(async (req, res) => {
   const pageNumber = Number(page);
   const skip = (pageNumber - 1) * pageSize;
 
+  // In-Memory RAM Cache check for high-frequency default catalog queries (e.g. limit=50)
+  const isGeneralCatalog = !keyword && !search && !category && !subcategory && !theme && !fit && !material && !minPrice && !maxPrice && !color && pageNumber === 1;
+  const cacheKey = isGeneralCatalog ? `products_catalog_${pageSize}_${sort || 'latest'}_${req.query.status || 'active'}` : null;
+
+  if (cacheKey) {
+    const cached = apiCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+  }
+
   const count = await Product.countDocuments(query);
   const products = await Product.find(query)
+    .select('name slug price originalPrice discount image images colors variants badge isBestseller fit theme rating stock material subcategory category')
     .populate('category', 'name slug')
     .sort(sortBy)
     .skip(skip)
@@ -156,15 +168,20 @@ const getProducts = asyncHandler(async (req, res) => {
     image: p.image || p.images?.[0] || p.colors?.[0]?.image || '/images/prod_minimal.jpg',
   }));
 
-  res.json({
+  const responsePayload = {
     success: true,
     count: count,
-    products: formatted,
     data: formatted,
     page: pageNumber,
     pages: Math.ceil(count / pageSize) || 1,
     total: count,
-  });
+  };
+
+  if (cacheKey) {
+    apiCache.set(cacheKey, responsePayload, 60);
+  }
+
+  res.json(responsePayload);
 });
 
 /**
