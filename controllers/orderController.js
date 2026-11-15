@@ -1,6 +1,7 @@
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { apiCache } from '../utils/cache.js';
 
 /**
  * @desc    Create new order
@@ -42,7 +43,66 @@ const createOrder = asyncHandler(async (req, res) => {
       ? Number(totalPrice)
       : calculatedItemsPrice + calculatedShippingPrice + calculatedTaxPrice;
 
-  // Create the order
+  // 1. LIVE STOCK VALIDATION BEFORE ORDER CREATION (Prevents Overselling & Race Conditions)
+  for (const item of orderItems) {
+    if (!item.product) continue;
+
+    const product = await Product.findById(item.product);
+    if (!product || product.isActive === false) {
+      res.status(400);
+      throw new Error(`"${item.name || 'Product'}" is no longer active or available.`);
+    }
+
+    const requestedQty = Number(item.quantity || 1);
+
+    // If product has variants, check that specific (size + color) variant stock
+    if (product.hasVariants && Array.isArray(product.variants) && product.variants.length > 0) {
+      const itemSize = (item.size || '').trim().toLowerCase();
+      const itemColor = (item.color || '').trim().toLowerCase();
+
+      const matchedVariant = product.variants.find((v) => {
+        const vSize = (v.size || '').trim().toLowerCase();
+        const vColor = (v.color || '').trim().toLowerCase();
+        const sizeMatches = vSize === itemSize;
+        const colorMatches = !itemColor || !vColor || vColor === itemColor;
+        return sizeMatches && colorMatches;
+      });
+
+      if (!matchedVariant) {
+        res.status(400);
+        throw new Error(
+          `Variant for "${item.name}" (${item.color ? item.color + ' / ' : ''}Size ${item.size}) is not available.`
+        );
+      }
+
+      const availableStock = Number(matchedVariant.stock || 0);
+      if (availableStock < requestedQty) {
+        res.status(400);
+        if (availableStock <= 0) {
+          throw new Error(
+            `OUT OF STOCK: "${item.name}" (${item.color ? item.color + ' - ' : ''}Size ${item.size}) just sold out!`
+          );
+        } else {
+          throw new Error(
+            `STOCK SHORTAGE: Only ${availableStock} left for "${item.name}" (${item.color ? item.color + ' - ' : ''}Size ${item.size}). Please reduce quantity.`
+          );
+        }
+      }
+    } else {
+      // Main product stock check (non-variant product)
+      const availableStock = Number(product.stock || 0);
+      if (availableStock < requestedQty) {
+        res.status(400);
+        if (availableStock <= 0) {
+          throw new Error(`OUT OF STOCK: "${item.name}" just sold out!`);
+        } else {
+          throw new Error(`STOCK SHORTAGE: Only ${availableStock} left for "${item.name}". Please reduce quantity.`);
+        }
+      }
+    }
+  }
+
+  // 2. All items in stock -> Create the order safely
   const order = new Order({
     user: req.user ? req.user._id : null,
     guestInfo: guestInfo || {
@@ -93,6 +153,9 @@ const createOrder = asyncHandler(async (req, res) => {
       }
     }
   }
+
+  // Clear server cache so next catalog requests immediately see updated stock
+  apiCache.clearAll();
 
   res.status(201).json({
     success: true,
