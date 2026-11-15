@@ -1,6 +1,7 @@
 import Section from '../models/sectionModel.js';
 import Product from '../models/productModel.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { apiCache } from '../utils/cache.js';
 
 /**
  * @desc    Get all active landing page sections with populated products
@@ -8,7 +9,13 @@ import asyncHandler from '../utils/asyncHandler.js';
  * @access  Public (Landing Page)
  */
 const getActiveSectionsWithProducts = asyncHandler(async (req, res) => {
-  const sections = await Section.find({ isActive: true }).sort({ displayOrder: 1 });
+  // 1. Fast Cache Hit check (serves in ~1ms from server RAM)
+  const cached = apiCache.get('active_sections');
+  if (cached) {
+    return res.json(cached);
+  }
+
+  const sections = await Section.find({ isActive: true }).sort({ displayOrder: 1 }).lean();
 
   const populatedSections = await Promise.all(
     sections.map(async (sec) => {
@@ -81,6 +88,7 @@ const getActiveSectionsWithProducts = asyncHandler(async (req, res) => {
       const finalQuery = conditions.length === 1 ? conditions[0] : { $and: conditions };
 
       const products = await Product.find(finalQuery)
+        .select('name slug price originalPrice discount image images colors variants badge isBestseller fit theme rating stock material')
         .sort({ discount: -1, isBestseller: -1, createdAt: -1 })
         .limit(sec.limit || 8)
         .lean();
@@ -118,12 +126,16 @@ const getActiveSectionsWithProducts = asyncHandler(async (req, res) => {
   // Filter out any sections that currently have 0 matching products
   const activeWithProducts = populatedSections.filter((sec) => sec.productsCount > 0);
 
-  res.json({
+  const responsePayload = {
     success: true,
     count: activeWithProducts.length,
-    sections: activeWithProducts,
     data: activeWithProducts,
-  });
+  };
+
+  // Cache response for 60 seconds (RAM memory)
+  apiCache.set('active_sections', responsePayload, 60);
+
+  res.json(responsePayload);
 });
 
 /**
@@ -187,6 +199,8 @@ const createSection = asyncHandler(async (req, res) => {
     isActive: isActive !== undefined ? Boolean(isActive) : true,
   });
 
+  apiCache.del('active_sections');
+
   res.status(201).json({
     success: true,
     section,
@@ -235,6 +249,7 @@ const updateSection = asyncHandler(async (req, res) => {
   });
 
   const updatedSection = await section.save();
+  apiCache.del('active_sections');
 
   res.json({
     success: true,
@@ -259,6 +274,7 @@ const toggleSectionStatus = asyncHandler(async (req, res) => {
 
   section.isActive = !section.isActive;
   await section.save();
+  apiCache.del('active_sections');
 
   res.json({
     success: true,
@@ -281,6 +297,7 @@ const deleteSection = asyncHandler(async (req, res) => {
   }
 
   await Section.findByIdAndDelete(req.params.id);
+  apiCache.del('active_sections');
 
   res.json({
     success: true,

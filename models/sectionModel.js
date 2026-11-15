@@ -73,6 +73,9 @@ const sectionSchema = new mongoose.Schema(
   }
 );
 
+// High-speed index for active landing page sections ordered by displayOrder
+sectionSchema.index({ isActive: 1, displayOrder: 1 });
+
 const Section = mongoose.model('Section', sectionSchema);
 
 export default Section;

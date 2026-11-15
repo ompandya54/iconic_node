@@ -1,6 +1,7 @@
 import Product from '../models/productModel.js';
 import Category from '../models/categoryModel.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { apiCache } from '../utils/cache.js';
 
 /**
  * @desc    Fetch all products with search, filters, sorting & pagination
@@ -318,26 +319,22 @@ const getProductAttributes = asyncHandler(async (req, res) => {
  */
 const getBestsellers = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 8;
+  const cacheKey = `bestsellers_${limit}`;
+
+  // 1. Fast Cache Hit check (RAM memory ~1ms)
+  const cached = apiCache.get(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
+
+  // 2. Single high-speed query: sorts marked bestsellers first, then highest rating & newest
   const products = await Product.find({
-    $or: [{ isBestseller: true }, { badge: /bestseller/i }],
     isActive: { $ne: false },
   })
-    .populate('category', 'name slug')
-    .sort({ rating: -1, createdAt: -1 })
+    .select('name slug price originalPrice discount image images colors variants badge isBestseller fit theme rating stock material')
+    .sort({ isBestseller: -1, rating: -1, createdAt: -1 })
     .limit(limit)
     .lean();
-
-  // Fallback: If not enough bestsellers marked, fetch active products
-  if (products.length < limit) {
-    const fallbackProducts = await Product.find({
-      isActive: { $ne: false },
-      _id: { $nin: products.map((p) => p._id) },
-    })
-      .sort({ rating: -1, createdAt: -1 })
-      .limit(limit - products.length)
-      .lean();
-    products.push(...fallbackProducts);
-  }
 
   // Format products with id string, formattedPrice, and image for frontend compatibility
   const formatted = products.map((p) => ({
@@ -347,12 +344,16 @@ const getBestsellers = asyncHandler(async (req, res) => {
     image: (p.image || p.images?.[0] || p.colors?.[0]?.image || '/images/prod_minimal.jpg').replace(/^http:\/\//i, 'https://'),
   }));
 
-  res.json({
+  const responsePayload = {
     success: true,
     count: formatted.length,
-    products: formatted,
     data: formatted,
-  });
+  };
+
+  // Cache response for 60 seconds
+  apiCache.set(cacheKey, responsePayload, 60);
+
+  res.json(responsePayload);
 });
 
 /**
@@ -473,6 +474,7 @@ const createProduct = asyncHandler(async (req, res) => {
   });
 
   const createdProduct = await product.save();
+  apiCache.clearAll();
 
   const formatted = {
     ...createdProduct.toObject(),
@@ -552,6 +554,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   product.markModified('images');
 
   const updatedProduct = await product.save();
+  apiCache.clearAll();
 
   const formatted = {
     ...updatedProduct.toObject(),
@@ -582,6 +585,7 @@ const toggleProductStatus = asyncHandler(async (req, res) => {
 
   product.isActive = !product.isActive;
   const updatedProduct = await product.save();
+  apiCache.clearAll();
 
   res.json({
     success: true,
@@ -608,6 +612,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 
   await Product.findByIdAndDelete(req.params.id);
+  apiCache.clearAll();
 
   res.json({
     success: true,
