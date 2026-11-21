@@ -147,7 +147,7 @@ const productSchema = new mongoose.Schema(
     // Global sizes & colors (supports strings or objects with name, hex, image)
     sizes: {
       type: [String],
-      default: ['S', 'M', 'L', 'XL'],
+      default: [],
     },
     colors: {
       type: mongoose.Schema.Types.Mixed,
@@ -161,7 +161,7 @@ const productSchema = new mongoose.Schema(
     // Variant support
     hasVariants: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     variants: [variantSchema],
     // Status management
