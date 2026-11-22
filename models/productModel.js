@@ -287,7 +287,6 @@ productSchema.pre('save', function (next) {
 // ==========================================
 
 // 1. Primary Lookups & Catalog Sorts
-productSchema.index({ slug: 1 }, { unique: true });
 productSchema.index({ isActive: 1, createdAt: -1 });
 
 // 2. High-Frequency Filters
