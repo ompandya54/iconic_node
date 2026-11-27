@@ -159,10 +159,6 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
     // Variant support
-    hasVariants: {
-      type: Boolean,
-      default: true,
-    },
     variants: [variantSchema],
     // Status management
     isActive: {
@@ -213,8 +209,6 @@ productSchema.pre('save', function (next) {
 
   // Handle Variants Logic
   if (this.variants && this.variants.length > 0) {
-    this.hasVariants = true;
-
     // Auto-calculate total stock across all variants
     this.stock = this.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
 

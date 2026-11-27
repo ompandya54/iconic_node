@@ -56,7 +56,7 @@ const createOrder = asyncHandler(async (req, res) => {
     const requestedQty = Number(item.quantity || 1);
 
     // If product has variants, check that specific (size + color) variant stock
-    if (product.hasVariants && Array.isArray(product.variants) && product.variants.length > 0) {
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
       const itemSize = (item.size || '').trim().toLowerCase();
       const itemColor = (item.color || '').trim().toLowerCase();
 
@@ -130,7 +130,7 @@ const createOrder = asyncHandler(async (req, res) => {
         const qtyToDeduct = Number(item.quantity || 1);
 
         // If product has variants, update specific variant stock
-        if (product.hasVariants && product.variants && product.variants.length > 0) {
+        if (Array.isArray(product.variants) && product.variants.length > 0) {
           const variantIndex = product.variants.findIndex(
             (v) =>
               v.size &&
